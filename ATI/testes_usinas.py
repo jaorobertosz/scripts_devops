@@ -155,12 +155,13 @@ def main():
             execute_remote_command(host, remote_username, remote_password, remote_command)
 
     elif test_type == "5":
-        # Executar comandos locais
         num_commands = int(input("Digite o número de comandos que deseja executar: "))
+        commands = []
         for i in range(num_commands):
             command = input(f"Digite o comando {i + 1} que deseja executar: ")
+            commands.append(command)
+        for command in commands:
             execute_local_command(command)
-    
     else:
         print("Opção de teste não reconhecida. Escolha '1' para ping, '2' para teste de porta, '3' para ping e teste de porta, '4' para testes remotos (Limpeza de memória), ou '5' para comandos locais.")
 
