@@ -76,6 +76,15 @@ def remote_tests(host, username, password, command):
     finally:
         # Feche a conexão SSH
         ssh_client.close()
+        
+def execute_local_command(command):
+    try:
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        print("Resultado do comando local:")
+        print(result.stdout)
+        print(result.stderr)
+    except Exception as e:
+        print(f"Erro ao executar o comando local: {e}")
 
 def main():
     num_hosts = int(input("Digite o número de hosts que deseja testar: "))
@@ -89,6 +98,7 @@ def main():
     print("(2) Teste de porta")
     print("(3) Ping e Teste de porta")
     print("(4) Testes remotos")
+    print("(5) Comandos locais")
     test_type = input("Digite o número correspondente à opção desejada: ")
 
     if test_type == "1":
@@ -136,16 +146,23 @@ def main():
                 print(f"As seguintes portas em {host} foram recusadas: {', '.join(map(str, refused_ports))}")
     
     elif test_type == "4":
-    # Configurar informações de conexão para testes remotos
+        # Configurar informações de conexão para testes remotos
         remote_username = input("Digite o nome de usuário para SSH: ")
         remote_password = input("Digite a senha para SSH: ")
         remote_command = input("Digite o comando remoto a ser executado: ")
 
-    for host in hosts:
-        execute_remote_command(host, remote_username, remote_password, remote_command)
+        for host in hosts:
+            execute_remote_command(host, remote_username, remote_password, remote_command)
 
+    elif test_type == "5":
+        # Executar comandos locais
+        num_commands = int(input("Digite o número de comandos que deseja executar: "))
+        for i in range(num_commands):
+            command = input(f"Digite o comando {i + 1} que deseja executar: ")
+            execute_local_command(command)
+    
     else:
-        print("Opção de teste não reconhecida. Escolha '1' para ping, '2' para teste de porta, '3' para ping e teste de porta, ou '4' para testes remotos (Limpeza de memória).")
+        print("Opção de teste não reconhecida. Escolha '1' para ping, '2' para teste de porta, '3' para ping e teste de porta, '4' para testes remotos (Limpeza de memória), ou '5' para comandos locais.")
 
 if __name__ == "__main__":
     main()
