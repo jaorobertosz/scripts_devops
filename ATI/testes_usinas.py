@@ -37,6 +37,15 @@ def test_ping_and_ports(host, ports):
 
     return is_ping_successful, open_ports, refused_ports
 
+def execute_local_command(command):
+    try:
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        print("Resultado do comando local:")
+        print(result.stdout)
+        print(result.stderr)
+    except Exception as e:
+        print(f"Erro ao executar o comando local: {e}")
+
 def execute_remote_command(host, username, password, command):
     try:
         # Estabeleça a conexão SSH
@@ -48,43 +57,14 @@ def execute_remote_command(host, username, password, command):
         stdin, stdout, stderr = ssh_client.exec_command(command)
         output = stdout.read().decode()
 
-        print("Resultado do comando remoto:")
+        print(f"Resultado do comando remoto em {host}:")
         print(output)
 
     except Exception as e:
-        print(f"Erro ao conectar ou executar o comando remoto: {e}")
+        print(f"Erro ao conectar ou executar o comando remoto em {host}: {e}")
     finally:
         # Feche a conexão SSH
         ssh_client.close()
-
-def remote_tests(host, username, password, command):
-    try:
-        # Estabeleça a conexão SSH
-        ssh_client = paramiko.SSHClient()
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh_client.connect(host, username=username, password=password)
-
-        # Execute o comando de limpeza de memória
-        stdin, stdout, stderr = ssh_client.exec_command(command)
-        output = stdout.read().decode()
-
-        print("Resultado do comando de limpeza de memória:")
-        print(output)
-
-    except Exception as e:
-        print(f"Erro ao conectar ou executar o comando: {e}")
-    finally:
-        # Feche a conexão SSH
-        ssh_client.close()
-        
-def execute_local_command(command):
-    try:
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        print("Resultado do comando local:")
-        print(result.stdout)
-        print(result.stderr)
-    except Exception as e:
-        print(f"Erro ao executar o comando local: {e}")
 
 def main():
     num_hosts = int(input("Digite o número de hosts que deseja testar: "))
@@ -102,7 +82,7 @@ def main():
     test_types = input("Digite o número(s) correspondente(s) à(s) opção(ões) desejada(s), separado(s) por vírgula: ").split(',')
 
     selected_tests = []
-    
+
     for test_type in test_types:
         if test_type == "1":
             selected_tests.append("Ping")
@@ -116,72 +96,71 @@ def main():
             selected_tests.append("Comandos locais")
         else:
             print(f"Opção de teste {test_type} não reconhecida.")
-    
-        for test in selected_tests:
-            print(f"Executando teste: {test}")
-    if test_type == "1":
-        for host in hosts:
-            if test_ping(host):
-                print(f"{host} está respondendo ao ping.")
-            else:
-                print(f"{host} não está respondendo ao ping.")
-    elif test_type == "2":
-        num_ports = int(input("Digite o número de portas que deseja testar: "))
-        ports = []
-        for i in range(num_ports):
-            port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
-            ports.append(port)
-        
-        for host in hosts:
-            for port in ports:
-                result = test_port(host, port)
-                if result is True:
-                    print(f"A porta {port} em {host} está aberta.")
-                elif result == "refused":
-                    print(f"A porta {port} em {host} foi recusada.")
+
+    for test in selected_tests:
+        print(f"Executando teste: {test}")
+        if test == "Ping":
+            for host in hosts:
+                if test_ping(host):
+                    print(f"{host} está respondendo ao ping.")
                 else:
-                    print(f"A porta {port} em {host} está fechada.")
-    elif test_type == "3":
-        num_ports = int(input("Digite o número de portas que deseja testar: "))
-        ports = []
-        for i in range(num_ports):
-            port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
-            ports.append(port)
-        
-        for host in hosts:
-            is_ping_successful, open_ports, refused_ports = test_ping_and_ports(host, ports)
-            if is_ping_successful:
-                print(f"{host} está respondendo ao ping.")
-            else:
-                print(f"{host} não está respondendo ao ping.")
-            
-            if open_ports:
-                print(f"As seguintes portas em {host} estão abertas: {', '.join(map(str, open_ports))}")
-            else:
-                print(f"Todas as portas em {host} estão fechadas.")
-            
-            if refused_ports:
-                print(f"As seguintes portas em {host} foram recusadas: {', '.join(map(str, refused_ports))}")
-    
-    elif test_type == "4":
-        # Configurar informações de conexão para testes remotos
-        remote_username = input("Digite o nome de usuário para SSH: ")
-        remote_password = input("Digite a senha para SSH: ")
-        remote_command = input("Digite o comando remoto a ser executado: ")
+                    print(f"{host} não está respondendo ao ping.")
 
-        for host in hosts:
-            execute_remote_command(host, remote_username, remote_password, remote_command)
+        elif test == "Teste de porta":
+            num_ports = int(input("Digite o número de portas que deseja testar: "))
+            ports = []
+            for i in range(num_ports):
+                port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
+                ports.append(port)
 
-    elif test_type == "5":
-        num_commands = int(input("Digite o número de comandos que deseja executar: "))
-        commands = []
-        for i in range(num_commands):
-            command = input(f"Digite o comando {i + 1} que deseja executar: ")
-            commands.append(command)
-        for command in commands:
-            execute_local_command(command)
-    else:
-        print("Opção de teste não reconhecida. Escolha '1' para ping, '2' para teste de porta, '3' para ping e teste de porta, '4' para testes remotos (Limpeza de memória), ou '5' para comandos locais.")
+            for host in hosts:
+                for port in ports:
+                    result = test_port(host, port)
+                    if result is True:
+                        print(f"A porta {port} em {host} está aberta.")
+                    elif result == "refused":
+                        print(f"A porta {port} em {host} foi recusada.")
+                    else:
+                        print(f"A porta {port} em {host} está fechada.")
+
+        elif test == "Ping e Teste de porta":
+            num_ports = int(input("Digite o número de portas que deseja testar: "))
+            ports = []
+            for i in range(num_ports):
+                port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
+                ports.append(port)
+
+            for host in hosts:
+                is_ping_successful, open_ports, refused_ports = test_ping_and_ports(host, ports)
+                if is_ping_successful:
+                    print(f"{host} está respondendo ao ping.")
+                else:
+                    print(f"{host} não está respondendo ao ping.")
+                
+                if open_ports:
+                    print(f"As seguintes portas em {host} estão abertas: {', '.join(map(str, open_ports))}")
+                else:
+                    print(f"Todas as portas em {host} estão fechadas.")
+                
+                if refused_ports:
+                    print(f"As seguintes portas em {host} foram recusadas: {', '.join(map(str, refused_ports))}")
+
+        elif test == "Testes remotos":
+            remote_username = input("Digite o nome de usuário para SSH: ")
+            remote_password = input("Digite a senha para SSH: ")
+            remote_command = input("Digite o comando remoto a ser executado: ")
+
+            for host in hosts:
+                execute_remote_command(host, remote_username, remote_password, remote_command)
+
+        elif test == "Comandos locais":
+            num_commands = int(input("Digite o número de comandos que deseja executar localmente: "))
+            commands = []
+            for i in range(num_commands):
+                command = input(f"Digite o comando {i + 1} que deseja executar: ")
+                commands.append(command)
+            for command in commands:
+                execute_local_command(command)
 
 if __name__ == "__main__":
     main()
