@@ -99,8 +99,26 @@ def main():
     print("(3) Ping e Teste de porta")
     print("(4) Testes remotos")
     print("(5) Comandos locais")
-    test_type = input("Digite o número correspondente à opção desejada: ")
+    test_types = input("Digite o número(s) correspondente(s) à(s) opção(ões) desejada(s), separado(s) por vírgula: ").split(',')
 
+    selected_tests = []
+    
+    for test_type in test_types:
+        if test_type == "1":
+            selected_tests.append("Ping")
+        elif test_type == "2":
+            selected_tests.append("Teste de porta")
+        elif test_type == "3":
+            selected_tests.append("Ping e Teste de porta")
+        elif test_type == "4":
+            selected_tests.append("Testes remotos")
+        elif test_type == "5":
+            selected_tests.append("Comandos locais")
+        else:
+            print(f"Opção de teste {test_type} não reconhecida.")
+    
+        for test in selected_tests:
+            print(f"Executando teste: {test}")
     if test_type == "1":
         for host in hosts:
             if test_ping(host):
