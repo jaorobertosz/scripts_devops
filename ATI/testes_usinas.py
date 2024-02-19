@@ -1,5 +1,21 @@
 import subprocess
+from datetime import datetime, timedelta
 import paramiko
+
+def obter_ultima_segunda():
+    hoje = datetime.now()
+    dias_passados = (hoje.weekday() - 0) % 7  # 0 = Segunda-feira
+    ultima_segunda = hoje - timedelta(days=dias_passados)
+    return ultima_segunda.strftime("%Y-%m-%d")
+
+def executar_script_shell(cliente):
+    comando = f"~/scripts_devops/USINAS/verifica_backup_{cliente}.sh"
+    try:
+        resultado = subprocess.check_output(comando, shell=True, text=True)
+        return resultado.splitlines()
+    except subprocess.CalledProcessError as e:
+        print(f"Ocorreu um erro ao executar o script: {e}")
+        return []
 
 def test_ping(host):
     try:
@@ -66,101 +82,140 @@ def execute_remote_command(host, username, password, command):
         # Feche a conexão SSH
         ssh_client.close()
 
-def main():
-    num_hosts = int(input("Digite o número de hosts que deseja testar: "))
-    hosts = []
-    for i in range(num_hosts):
-        host = input(f"Digite o endereço IP do host {i + 1}: ")
-        hosts.append(host)
-
-    print("Qual teste deseja realizar?")
+def exibir_menu_opcoes():
+    print("Selecione a operação desejada:")
     print("(1) Ping")
     print("(2) Teste de porta")
     print("(3) Ping e Teste de porta")
     print("(4) Testes remotos")
     print("(5) Comandos locais")
-    test_types = input("Digite o número(s) correspondente(s) à(s) opção(ões) desejada(s), separado(s) por vírgula: ").split(',')
+    print("(6) Verificar backups")
 
-    selected_tests = []
+def main():
+    exibir_menu_opcoes()
+    opcao = input("Digite o número correspondente à opção desejada: ")
 
-    for test_type in test_types:
-        if test_type == "1":
+    if opcao == "6":
+        clientes = {
+            "1": "AEVO",
+            "2": "ARAXA",
+            "3": "CARAPRETA",
+            "4": "CASAFORTE",
+            "5": "ENERGEA",
+            "6": "ENERSIDE",
+            "7": "KIRRA",
+            "8": "RIOPOTI",
+            "9": "SOLCOPERNICO",
+            "10": "TRINITY",
+            "11": "VIENA",
+            # Adicione mais clientes conforme necessário
+        }
+
+        print("Escolha um cliente para verificar o backup:")
+        for key, value in clientes.items():
+            print(f"({key}) {value}")
+
+        opcao_cliente = input("Digite o número correspondente ao cliente: ")
+        
+        if opcao_cliente in clientes:
+            cliente_selecionado = clientes[opcao_cliente]
+            resultado_script = executar_script_shell(cliente_selecionado)
+
+            if not resultado_script:
+                print(f"Nenhum backup encontrado para o cliente {cliente_selecionado}.")
+            else:
+                print(f"Backups encontrados para o cliente {cliente_selecionado}:")
+                for linha in resultado_script:
+                    print(linha)
+        else:
+            print("Opção inválida. Por favor, escolha uma opção válida.")
+
+    else:
+        num_hosts = int(input("Digite o número de hosts que deseja testar: "))
+        hosts = []
+        for i in range(num_hosts):
+            host = input(f"Digite o endereço IP do host {i + 1}: ")
+            hosts.append(host)
+
+        selected_tests = []
+
+        if opcao == "1":
             selected_tests.append("Ping")
-        elif test_type == "2":
+        elif opcao == "2":
             selected_tests.append("Teste de porta")
-        elif test_type == "3":
+        elif opcao == "3":
             selected_tests.append("Ping e Teste de porta")
-        elif test_type == "4":
+        elif opcao == "4":
             selected_tests.append("Testes remotos")
-        elif test_type == "5":
+        elif opcao == "5":
             selected_tests.append("Comandos locais")
         else:
-            print(f"Opção de teste {test_type} não reconhecida.")
+            print(f"Opção {opcao} não reconhecida.")
 
-    for test in selected_tests:
-        print(f"Executando teste: {test}")
-        if test == "Ping":
-            for host in hosts:
-                if test_ping(host):
-                    print(f"{host} está respondendo ao ping.")
-                else:
-                    print(f"{host} não está respondendo ao ping.")
-
-        elif test == "Teste de porta":
-            num_ports = int(input("Digite o número de portas que deseja testar: "))
-            ports = []
-            for i in range(num_ports):
-                port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
-                ports.append(port)
-
-            for host in hosts:
-                for port in ports:
-                    result = test_port(host, port)
-                    if result is True:
-                        print(f"A porta {port} em {host} está aberta.")
-                    elif result == "refused":
-                        print(f"A porta {port} em {host} foi recusada.")
+        for test in selected_tests:
+            print(f"Executando teste: {test}")
+            if test == "Ping":
+                for host in hosts:
+                    if test_ping(host):
+                        print(f"{host} está respondendo ao ping.")
                     else:
-                        print(f"A porta {port} em {host} está fechada.")
+                        print(f"{host} não está respondendo ao ping.")
 
-        elif test == "Ping e Teste de porta":
-            num_ports = int(input("Digite o número de portas que deseja testar: "))
-            ports = []
-            for i in range(num_ports):
-                port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
-                ports.append(port)
+            elif test == "Teste de porta":
+                num_ports = int(input("Digite o número de portas que deseja testar: "))
+                ports = []
+                for i in range(num_ports):
+                    port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
+                    ports.append(port)
 
-            for host in hosts:
-                is_ping_successful, open_ports, refused_ports = test_ping_and_ports(host, ports)
-                if is_ping_successful:
-                    print(f"{host} está respondendo ao ping.")
-                else:
-                    print(f"{host} não está respondendo ao ping.")
-                
-                if open_ports:
-                    print(f"As seguintes portas em {host} estão abertas: {', '.join(map(str, open_ports))}")
-                else:
-                    print(f"Todas as portas em {host} estão fechadas.")
-                
-                if refused_ports:
-                    print(f"As seguintes portas em {host} foram recusadas: {', '.join(map(str, refused_ports))}")
+                for host in hosts:
+                    for port in ports:
+                        result = test_port(host, port)
+                        if result is True:
+                            print(f"A porta {port} em {host} está aberta.")
+                        elif result == "refused":
+                            print(f"A porta {port} em {host} foi recusada.")
+                        else:
+                            print(f"A porta {port} em {host} está fechada.")
 
-        elif test == "Testes remotos":
-            remote_username = input("Digite o nome de usuário para SSH: ")
-            remote_password = input("Digite a senha para SSH: ")
-            remote_command = input("Digite o comando remoto a ser executado: ")
+            elif test == "Ping e Teste de porta":
+                num_ports = int(input("Digite o número de portas que deseja testar: "))
+                ports = []
+                for i in range(num_ports):
+                    port = int(input(f"Digite a porta {i + 1} que deseja testar: "))
+                    ports.append(port)
 
-            for host in hosts:
-                execute_remote_command(host, remote_username, remote_password, remote_command)
+                for host in hosts:
+                    is_ping_successful, open_ports, refused_ports = test_ping_and_ports(host, ports)
+                    if is_ping_successful:
+                        print(f"{host} está respondendo ao ping.")
+                    else:
+                        print(f"{host} não está respondendo ao ping.")
+                    
+                    if open_ports:
+                        print(f"As seguintes portas em {host} estão abertas: {', '.join(map(str, open_ports))}")
+                    else:
+                        print(f"Todas as portas em {host} estão fechadas.")
+                    
+                    if refused_ports:
+                        print(f"As seguintes portas em {host} foram recusadas: {', '.join(map(str, refused_ports))}")                              
 
-        elif test == "Comandos locais":
-            num_commands = int(input("Digite o número de comandos que deseja executar localmente: "))
-            commands = []
-            for i in range(num_commands):
-                command = input(f"Digite o comando {i + 1} que deseja executar: ")
-                commands.append(command)
-            for command in commands:
-                execute_local_command(command)
+            elif test == "Testes remotos":
+                remote_username = input("Digite o nome de usuário para SSH: ")
+                remote_password = input("Digite a senha para SSH: ")
+                remote_command = input("Digite o comando remoto a ser executado: ")
+
+                for host in hosts:
+                    execute_remote_command(host, remote_username, remote_password, remote_command)
+
+            elif test == "Comandos locais":
+                num_commands = int(input("Digite o número de comandos que deseja executar localmente: "))
+                commands = []
+                for i in range(num_commands):
+                    command = input(f"Digite o comando {i + 1} que deseja executar: ")
+                    commands.append(command)
+                for command in commands:
+                    execute_local_command(command)
 
 if __name__ == "__main__":
     main()
