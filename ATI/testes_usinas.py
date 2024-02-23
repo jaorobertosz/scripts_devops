@@ -1,6 +1,11 @@
 import subprocess
+import shutil
+import os
 from datetime import datetime, timedelta
 import paramiko
+
+def run_command(command):
+    subprocess.run(command, shell=True, check=True)
 
 def obter_ultima_segunda():
     hoje = datetime.now()
@@ -82,6 +87,34 @@ def execute_remote_command(host, username, password, command):
         # Feche a conexão SSH
         ssh_client.close()
 
+def adicionar_backup(cliente):
+    try:
+        print("Criando o novo diretório para o cliente...")
+        novo_diretorio = f"/USINAS/{cliente}/BACKUP/"
+        os.makedirs(novo_diretorio)
+        print(f"Novo diretório criado em: {novo_diretorio}")
+
+        diretorio = "/scripts_devops/ATI/"
+        diretorio_backups = "/scripts_devops/USINAS/"
+        print("Copiando o arquivo verifica_backup_CLIENTE.sh para o novo diretório...")
+        shutil.copyfile(f"{diretorio}verifica_backup_CLIENTE.sh", f"{diretorio_backups}/verifica_backup_{cliente}.sh")
+        print(f"Arquivo copiado para: {diretorio_backups}/verifica_backup_{cliente}.sh")
+
+        print("Atualizando o arquivo verifica_backup_CLIENTE com o nome do cliente...")
+        with open(f"{diretorio_backups}/verifica_backup_{cliente}.sh", 'r+') as f:
+            conteudo = f.read()
+            f.seek(0)
+            f.write(conteudo.replace('CLIENTE="CLIENTE"', f'CLIENTE="{cliente}"'))
+            f.truncate()
+        
+        usuario_zabbix = "suporteati"
+        print("Executando alterações de permissões")
+        run_command(f'chown {usuario_zabbix}. {novo_diretorio} -R  ')
+
+        print(f"Backup para o cliente {cliente} adicionado com sucesso.")
+    except Exception as e:
+        print(f"Erro ao adicionar backup para o cliente {cliente}: {e}")
+
 def exibir_menu_opcoes():
     print("Selecione a operação desejada:")
     print("(1) Ping")
@@ -89,7 +122,7 @@ def exibir_menu_opcoes():
     print("(3) Ping e Teste de porta")
     print("(4) Testes remotos")
     print("(5) Comandos locais")
-    print("(6) Verificar backups")
+    print("(6) Verificar backups e Adicionar novo Backup (Cliente)")
 
 def main():
     exibir_menu_opcoes()
@@ -97,23 +130,28 @@ def main():
 
     if opcao == "6":
         clientes = {
-            "1": "AEVO",
-            "2": "ARAXA",
-            "3": "CARAPRETA",
-            "4": "CASAFORTE",
-            "5": "ENERGEA",
-            "6": "ENERSIDE",
-            "7": "KIRRA",
-            "8": "RIOPOTI",
-            "9": "SOLCOPERNICO",
-            "10": "TRINITY",
-            "11": "VIENA",
-            "12": "CARVALHO-ENERGIAS",
-            "13": "E1ENERGIAS",
+        "1": "AEVO",
+        "2": "ARAXA",
+        "3": "CARAPRETA",
+        "4": "CASAFORTE",
+        "5": "ENERGEA",
+        "6": "ENERSIDE",
+        "7": "KIRRA",
+        "8": "RIOPOTI",
+        "9": "SOLCOPERNICO",
+        "10": "TRINITY",
+        "11": "VIENA",
+        "12": "CARVALHO-ENERGIAS",
+        "13": "E1ENERGIAS",
+        # Adicione mais clientes conforme necessário
+    }
 
-            # Adicione mais clientes conforme necessário
-        }
+    print("Escolha uma opção:")
+    print("(1) Verificar Backup Cliente existente")
+    print("(2) Adicionar um novo Backup (Cliente)")
+    opcao = input("Digite o número correspondente à opção desejada: ")
 
+    if opcao == "1":
         print("Escolha um cliente para verificar o backup:")
         for key, value in clientes.items():
             print(f"({key}) {value}")
@@ -132,6 +170,10 @@ def main():
                     print(linha)
         else:
             print("Opção inválida. Por favor, escolha uma opção válida.")
+        
+    elif opcao == "2":
+        cliente = input("Qual é o nome do cliente? ")
+        adicionar_backup(cliente)
 
     else:
         num_hosts = int(input("Digite o número de hosts que deseja testar: "))

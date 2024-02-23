@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CLIENTE="E1ENERGIAS" # Substitua "nome_do_cliente" pelo nome real do cliente
+CLIENTE="CLIENTE" # Substitua "nome_do_cliente" pelo nome real do cliente
 DIRETORIO="/USINAS/$CLIENTE/BACKUP/"
 
 # Data atual
