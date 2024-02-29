@@ -91,25 +91,30 @@ def adicionar_backup(cliente):
     try:
         print("Criando o novo diretório para o cliente...")
         novo_diretorio = f"/USINAS/{cliente}/BACKUP/"
-        os.makedirs(novo_diretorio)
+        os.makedirs(novo_diretorio, exist_ok=True)
         print(f"Novo diretório criado em: {novo_diretorio}")
 
         diretorio = "/scripts_devops/ATI/"
-        diretorio_backups = "/scripts_devops/USINAS/"
-        print("Copiando o arquivo verifica_backup_CLIENTE.sh para o novo diretório...")
-        shutil.copyfile(f"{diretorio}verifica_backup_CLIENTE.sh", f"{diretorio_backups}/verifica_backup_{cliente}.sh")
-        print(f"Arquivo copiado para: {diretorio_backups}/verifica_backup_{cliente}.sh")
+        diretorio_usinas = "/scripts_devops/USINAS/"
+        diretorio_backup = "/scripts_devops/BACKUPS/"
+        print("Copiando o arquivo verifica_backup_CLIENTE.sh & script_zabbix.sh para o novo diretório...")
+        shutil.copyfile(f"{diretorio}verifica_backup_CLIENTE.sh", f"{diretorio_usinas}verifica_backup_{cliente}.sh")
+        shutil.copyfile(f"{diretorio}script_zabbix.sh", f"{diretorio_backup}script_{cliente}.sh")
+        run_command(f"chmod u+x {diretorio_usinas}verifica_backup_{cliente}.sh {diretorio_backup}script_{cliente}.sh ; chown -R {usuario_zabbix}. {diretorio_usinas}* {diretorio_backup}* ")
+        run_command(f"chown {usuario_ati}. -R {novo_diretorio}")
+        print(f"Arquivo copiado para: {diretorio_usinas}verifica_backup_{cliente}.sh")
 
         print("Atualizando o arquivo verifica_backup_CLIENTE com o nome do cliente...")
-        with open(f"{diretorio_backups}/verifica_backup_{cliente}.sh", 'r+') as f:
+        with open(f"{diretorio_usinas}verifica_backup_{cliente}.sh", 'r+') as f:
             conteudo = f.read()
             f.seek(0)
             f.write(conteudo.replace('CLIENTE="CLIENTE"', f'CLIENTE="{cliente}"'))
             f.truncate()
         
-        usuario_zabbix = "suporteati"
+        usuario_zabbix = "suporte-zabbix"
+        usuario_ati = "suporteati"
         print("Executando alterações de permissões")
-        run_command(f'chown {usuario_zabbix}. {novo_diretorio} -R  ')
+        run_command(f'chown {usuario_ati}. {novo_diretorio} -R')
 
         print(f"Backup para o cliente {cliente} adicionado com sucesso.")
     except Exception as e:
@@ -144,36 +149,36 @@ def main():
         "12": "CARVALHO-ENERGIAS",
         "13": "E1ENERGIAS",
         # Adicione mais clientes conforme necessário
-    }
+        }
 
-    print("Escolha uma opção:")
-    print("(1) Verificar Backup Cliente existente")
-    print("(2) Adicionar um novo Backup (Cliente)")
-    opcao = input("Digite o número correspondente à opção desejada: ")
+        print("Escolha uma opção:")
+        print("(1) Verificar Backup Cliente existente")
+        print("(2) Adicionar um novo Backup (Cliente)")
+        opcao = input("Digite o número correspondente à opção desejada: ")
 
-    if opcao == "1":
-        print("Escolha um cliente para verificar o backup:")
-        for key, value in clientes.items():
-            print(f"({key}) {value}")
+        if opcao == "1":
+            print("Escolha um cliente para verificar o backup:")
+            for key, value in clientes.items():
+                print(f"({key}) {value}")
 
-        opcao_cliente = input("Digite o número correspondente ao cliente: ")
-        
-        if opcao_cliente in clientes:
-            cliente_selecionado = clientes[opcao_cliente]
-            resultado_script = executar_script_shell(cliente_selecionado)
+            opcao_cliente = input("Digite o número correspondente ao cliente: ")
 
-            if not resultado_script:
-                print(f"Nenhum backup encontrado para o cliente {cliente_selecionado}.")
+            if opcao_cliente in clientes:
+                cliente_selecionado = clientes[opcao_cliente]
+                resultado_script = executar_script_shell(cliente_selecionado)
+
+                if not resultado_script:
+                    print(f"Nenhum backup encontrado para o cliente {cliente_selecionado}.")
+                else:
+                    print(f"Backups encontrados para o cliente {cliente_selecionado}:")
+                    for linha in resultado_script:
+                        print(linha)
             else:
-                print(f"Backups encontrados para o cliente {cliente_selecionado}:")
-                for linha in resultado_script:
-                    print(linha)
-        else:
-            print("Opção inválida. Por favor, escolha uma opção válida.")
-        
-    elif opcao == "2":
-        cliente = input("Qual é o nome do cliente? ")
-        adicionar_backup(cliente)
+                print("Opção inválida. Por favor, escolha uma opção válida.")
+
+        elif opcao == "2":
+            cliente = input("Qual é o nome do cliente? ")
+            adicionar_backup(cliente)
 
     else:
         num_hosts = int(input("Digite o número de hosts que deseja testar: "))
