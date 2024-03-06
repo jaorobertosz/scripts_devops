@@ -16,9 +16,9 @@ MSG4="FALHA NA TRANSFERENCIA DO BACKUP PARA A ATI"
 MSG5="ALTERAÇÃO DE PERMISSÃO REALIZADA"
 
 # Remover o backup anterior
-if [ -e "$BKPDIR" ]; then
-  rm -f "$BKPDIR"*
-fi
+#if [ -e "$BKPDIR" ]; then
+#  rm -f "$BKPDIR"*
+#fi
 
 #	BACKUP ETH1
 	echo "Realizando BACKUP ETH1"
