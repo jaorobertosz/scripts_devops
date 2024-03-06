@@ -14,11 +14,7 @@ def obter_ultima_segunda():
     return ultima_segunda.strftime("%Y-%m-%d")
 
 def executar_script_shell(cliente):
-<<<<<<< HEAD
     comando = f"cd /scripts_devops/USINAS/ ; ./verifica_backup_{cliente}.sh"
-=======
-    comando = f"/scripts_devops/USINAS/verifica_backup_{cliente}.sh"
->>>>>>> 35ea3c32416c377f605adbaddf408ea9f449eb1f
     try:
         resultado = subprocess.check_output(comando, shell=True, text=True)
         return resultado.splitlines()
