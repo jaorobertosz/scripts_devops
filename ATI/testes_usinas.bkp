@@ -14,7 +14,11 @@ def obter_ultima_segunda():
     return ultima_segunda.strftime("%Y-%m-%d")
 
 def executar_script_shell(cliente):
+<<<<<<< HEAD
     comando = f"cd /scripts_devops/USINAS/ ; ./verifica_backup_{cliente}.sh"
+=======
+    comando = f"/scripts_devops/USINAS/verifica_backup_{cliente}.sh"
+>>>>>>> 35ea3c32416c377f605adbaddf408ea9f449eb1f
     try:
         resultado = subprocess.check_output(comando, shell=True, text=True)
         return resultado.splitlines()
@@ -90,26 +94,31 @@ def execute_remote_command(host, username, password, command):
 def adicionar_backup(cliente):
     try:
         print("Criando o novo diretório para o cliente...")
-        novo_diretorio = f"/scripts_devops/USINAS/{cliente}/BACKUP/"
+        novo_diretorio = f"/USINAS/{cliente}/BACKUP/"
         os.makedirs(novo_diretorio, exist_ok=True)
         print(f"Novo diretório criado em: {novo_diretorio}")
 
         diretorio = "/scripts_devops/ATI/"
-        diretorio_backups = "/scripts_devops/USINAS/"
-        print("Copiando o arquivo verifica_backup_CLIENTE.sh para o novo diretório...")
-        shutil.copyfile(f"{diretorio}verifica_backup_CLIENTE.sh", f"{novo_diretorio}verifica_backup_{cliente}.sh")
-        print(f"Arquivo copiado para: {novo_diretorio}verifica_backup_{cliente}.sh")
+        diretorio_usinas = "/scripts_devops/USINAS/"
+        diretorio_backup = "/scripts_devops/BACKUPS/"
+        print("Copiando o arquivo verifica_backup_CLIENTE.sh & script_zabbix.sh para o novo diretório...")
+        shutil.copyfile(f"{diretorio}verifica_backup_CLIENTE.sh", f"{diretorio_usinas}verifica_backup_{cliente}.sh")
+        shutil.copyfile(f"{diretorio}script_zabbix.sh", f"{diretorio_backup}script_{cliente}.sh")
+        run_command(f"chmod u+x {diretorio_usinas}verifica_backup_{cliente}.sh {diretorio_backup}script_{cliente}.sh ; chown -R {usuario_zabbix}. {diretorio_usinas}* {diretorio_backup}* ")
+        run_command(f"chown {usuario_ati}. -R {novo_diretorio}")
+        print(f"Arquivo copiado para: {diretorio_usinas}verifica_backup_{cliente}.sh")
 
         print("Atualizando o arquivo verifica_backup_CLIENTE com o nome do cliente...")
-        with open(f"{novo_diretorio}verifica_backup_{cliente}.sh", 'r+') as f:
+        with open(f"{diretorio_usinas}verifica_backup_{cliente}.sh", 'r+') as f:
             conteudo = f.read()
             f.seek(0)
             f.write(conteudo.replace('CLIENTE="CLIENTE"', f'CLIENTE="{cliente}"'))
             f.truncate()
         
-        usuario_zabbix = "suporteati"
+        usuario_zabbix = "suporte-zabbix"
+        usuario_ati = "suporteati"
         print("Executando alterações de permissões")
-        run_command(f'chown {usuario_zabbix}. {novo_diretorio} -R')
+        run_command(f'chown {usuario_ati}. {novo_diretorio} -R')
 
         print(f"Backup para o cliente {cliente} adicionado com sucesso.")
     except Exception as e:
