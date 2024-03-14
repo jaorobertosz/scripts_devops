@@ -43,7 +43,10 @@ MSG5="ALTERAÇÃO DE PERMISSÃO REALIZADA"
 
 	sleep 5s
 
+<<<<<<< HEAD
         scp "$BKPVAL0_ETH1:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5"
+=======
+>>>>>>> a347ff54d5ab2bc676416cd4e7180acdfb8a240c
 	scp -p -qo ConnectTimeout=3 "$BKPVAL0_ETH1:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5"
 
 
@@ -61,11 +64,14 @@ MSG5="ALTERAÇÃO DE PERMISSÃO REALIZADA"
        
 	sleep 5s
 
+<<<<<<< HEAD
         scp "$BKPCHP03_ETH2:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4"
 
 	sleep 5s
 
         scp "$BKPVAL0_ETH2:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4"
+=======
+>>>>>>> a347ff54d5ab2bc676416cd4e7180acdfb8a240c
     scp -p -qo ConnectTimeout=3 "$BKPCHP03_ETH2:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4"
 
 	sleep 5s

@@ -15,6 +15,7 @@ def obter_ultima_segunda():
 
 def executar_script_shell(cliente):
     comando = f"cd /scripts_devops/USINAS/ ; ./verifica_backup_{cliente}.sh"
+    comando = f"/scripts_devops/USINAS/verifica_backup_{cliente}.sh"
     try:
         resultado = subprocess.check_output(comando, shell=True, text=True)
         return resultado.splitlines()
