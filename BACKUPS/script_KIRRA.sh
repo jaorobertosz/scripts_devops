@@ -21,7 +21,15 @@ MSG5="ALTERAÇÃO DE PERMISSÃO REALIZADA"
 #fi
 
 #	BACKUP MATEUS-LEME_ETH1
-	scp -p -qo ConnectTimeout=3 "$BKPETH1:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5" 
+	echo "Realizando BACKUP ETH1"
 
+	sleep 5s
+	scp -p -qo ConnectTimeout=3 "$BKPETH1:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5" 
+	
+	sleep 5s
 #	BACKUP MATHEUS-LEME_ETH2
+
+	echo "Realizando BACKUP ETH2"
+
+	sleep 5s
 	scp -p -qo ConnectTimeout=3 "$BKPETH2:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5" 
