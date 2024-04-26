@@ -2,10 +2,10 @@
 
 SRV=$(hostname)
 DATA=$(date +%d%m%Y%H%M)
-CLIENTE='AEVO'
+CLIENTE='CARAPRETA'
 FILE="BKP_$SRV_$DATA.tgz"
-BKPJQBS_ETH1='JEQUITIBA-SUL-AEVO'
-BKPJQBN_ETH2='JEQUITIBA-NORTE-AEVO'
+BKP_ETH1='SANTAMONICAETH1'
+BKP_ETH2='SANTAMONICAETH2'
 USERZBX='suporteati'
 BKPDIRUTR=/root/BACKUP/BKP_*
 BKPDIR=/USINAS/${CLIENTE}/BACKUP/
@@ -24,12 +24,12 @@ MSG5="ALTERAÇÃO DE PERMISSÃO REALIZADA"
 	
 	echo "Realizando BACKUP ETH1"
 	sleep 5s
-	scp "$BKPJQBS_ETH1:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5"
+	scp "$BKP_ETH1:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5"
 
 
 #	BACKUP ETH2
 
 	echo "Realizando BACKUP ETH2"
 	sleep 5s
-	scp "$BKPJQBN_ETH2:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4"
+	scp "$BKP_ETH2:$BKPDIRUTR" "$BKPDIR" && echo "$(date +%d%m%Y%H%M) - $MSG1" && echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG3" || echo "$(date +%d/%m/%Y-%H:%M:%S) - $MSG4" && chown "$USERZBX". "$BKPDIR" -R && echo "$DATA - $MSG5"
 
